@@ -7,9 +7,9 @@ var ds = new Miso.Dataset({
 
 ds.fetch({ 
   success : function() {
-    log(ds.columnNames());
+    console.log(ds.columnNames());
   },
   error : function() {
-    log("Are you sure you are connected to the internet?");
+    console.log("Are you sure you are connected to the internet?");
   }
 });

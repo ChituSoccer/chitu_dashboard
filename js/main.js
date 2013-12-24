@@ -1,7 +1,9 @@
+var leaderboard_key = '0ApIcf6jg2PQ4dGdTQkFOQ2RVQ2lHb1ktSEVnLTNZYXc';
+
 var ds = new Miso.Dataset({
   importer : Miso.Dataset.Importers.GoogleSpreadsheet,
   parser : Miso.Dataset.Parsers.GoogleSpreadsheet,
-  key : "0Asnl0xYK7V16dFpFVmZUUy1taXdFbUJGdGtVdFBXbFE",
+  key : leaderboard_key,
   worksheet : "1"
 });
 

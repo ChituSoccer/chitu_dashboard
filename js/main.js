@@ -10,7 +10,7 @@ function drawChart() {
 	  url: data_api,
 	  dataType:"jsonp",
 	  success: function( response ) {
-        console.log("response:" + response ); // server response
+        console.log("response:" + JSON.stringify(response) ); // server response
       },
       error: function(e) {
         console.log(e.message);

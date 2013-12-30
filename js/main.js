@@ -4,6 +4,7 @@ google.load('visualization', '1', {'packages':['corechart']});
 // Set a callback to run when the Google Visualization API is loaded.
 google.setOnLoadCallback(drawChart);
   
+var o = 0;
 function drawChart() {
   var data_api = "https://script.google.com/macros/s/AKfycbz6TcOdQFZnEptubFeCGVYkysVpASbNfbxiXVdBzyI/exec";
   var jsonData = $.ajax({
@@ -11,6 +12,7 @@ function drawChart() {
 	  dataType:"jsonp",
 	  success: function( response ) {
         console.log("response:" + JSON.stringify(response) ); // server response
+		o = response;
       },
       error: function(e) {
         console.log(e.message);

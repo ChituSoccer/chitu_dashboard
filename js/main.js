@@ -9,10 +9,14 @@ function drawChart() {
   var jsonData = $.ajax({
 	  url: data_api,
 	  dataType:"jsonp",
-	  async: false
-	  }).responseText;
+	  success: function( response ) {
+        console.log("response:" + response ); // server response
+      },
+      error: function(e) {
+        console.log(e.message);
+      }
+	  });
 
-  console.log(jsonData);
 	  
   // Create our data table out of JSON data loaded from server.
   //var data = new google.visualization.DataTable(jsonData);

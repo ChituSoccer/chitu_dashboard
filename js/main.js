@@ -5,7 +5,7 @@ google.load('visualization', '1', {'packages':['corechart']});
 google.setOnLoadCallback(drawChart);
   
 function drawChart() {
-  var data_api = "https://script.google.com/macros/s/AKfycbz6TcOdQFZnEptubFeCGVYkysVpASbNfbxiXVdBzyI/exec";
+  var data_api = "https://script.google.com/macros/s/AKfycbzHGDaQ95wf54l7DamRvEQKbLeWCO2fhO5d3g71EPNHp_m2BY4/exec";
   var jsonData = $.ajax({
 	  url: data_api,
 	  dataType:"jsonp",

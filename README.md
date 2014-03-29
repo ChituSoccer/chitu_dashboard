@@ -1,3 +1,4 @@
+copied from https://github.com/ccoenraets/olympic-dashboard-chartjs
 
 1. show latest score
 2. show leaderboard bar chart

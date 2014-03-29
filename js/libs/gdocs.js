@@ -146,7 +146,7 @@ if (typeof module !== 'undefined' && module != null && typeof require !== 'undef
 
     return {
       worksheetAPI: 'https://spreadsheets.google.com/feeds/list/'+ key +'/'+ worksheet +'/public/values?alt=json',
-      spreadsheetAPI: 'https://spreadsheets.google.com/feeds/worksheets/'+ key +'/public/basic?alt=json',
+      spreadsheetAPI: 'https://spreadsheets.google.com/feeds/worksheets/'+ key +'/public/values?alt=json',
       spreadsheetKey: key,
       worksheetIndex: worksheet
     };

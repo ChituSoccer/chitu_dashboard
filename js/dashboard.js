@@ -24,8 +24,9 @@ function create_head_counts(raw) {
   for (var i = 4; i < raw.fields.length; i++) {
     var n = 0;
     var name = raw.fields[i].id;
-    for (var j = 0; j < raw.records.length; j++) {
-      if (raw.records[j][name]) n++;
+    for (var j = 2; j < raw.records.length; j++) {
+      var v = raw.records[j][name].trim();
+      if (v == "C" || v == "W" || v == "1") n++;
     }
     heads_count[i-4] = {"week":i-4, "count":n};
   }

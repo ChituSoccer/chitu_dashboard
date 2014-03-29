@@ -79,8 +79,8 @@ var dashboard1 = (function () {
     function render() {
 
         var html =
-            '<div id="chart1" class="chart2"></div>' +
-                '<div id="chart2" class="chart2"></div>';
+            '<div id="chart1" class="chart"></div>' +
+                '<div id="chart2" class="chart"></div>';
 
         $("#content").html(html);
 

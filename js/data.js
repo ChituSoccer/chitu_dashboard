@@ -1,8 +1,8 @@
 // load data and create data products
 // raw data
-// heads_count
-// player_name_array
-// game_info
+// player_names[i] is the name for ith player
+// game_days[j] is the day for jth game
+// game_info[j] is the information for jth game
 // player_info
 // player_win_lose_data
 //   first row is time
@@ -28,39 +28,46 @@ gdocs.fetch({ url: chitu_pubdata_key }).done(function(result) {
 // the first column is the player's id
 function create_data_products(raw) {
   var dp = {};
-  dp['raw'] = raw;
-  dp['heads_count'] = get_head_counts(raw);
-  dp['player_names'] = get_player_names(raw);
-  dp['games'] = get_all_games(dp);
-  dp['last_game'] = get_last_game(dp);
+  dp.raw = raw;
+  dp.player_names = get_player_names(raw);
+  dp.game_days = get_game_days(raw);
+  dp.win_side_history = get_win_side_history(dp);
+  dp.games = get_all_games(dp);
+  dp.last_game = _.last(dp.games);
   return dp;
 }
 
-// for every column, add up non-zero items
-function get_head_counts(raw) {
-  var heads_count = [];
-  for (var i = 4; i < raw.fields.length; i++) {
-    var n = 0;
-    var name = raw.fields[i].id;
-    for (var j = 2; j < raw.records.length; j++) {
-      var v = raw.records[j][name].trim();
-      if (v && v != "0") n++;
-    }
-    heads_count[i-4] = {"week":raw.records[0][name].trim(), "count":n};
-  }
-  return heads_count;
+// i-th row, j-th col, start from 0
+function get_value(raw, i, j) {
+  return raw.records[i][raw.fields[j].id];
 }
+
+function get_row(raw, row_ind) {
+  var r = [];
+  for (var i = 0; i < raw.fields.length; i++) {
+    r[i] = get_value(raw, row_ind, i);
+  }
+  return r;
+}
+
+function get_col(raw, col_id) {
+  var c = [];
+  for (var i = 0; i < raw.records.length; i++) {
+    c[i] = get_value(raw, i, col_id);
+  }
+  return c;
+}
+
 
 // player_names[i] is the name of player in ith row
 function get_player_names(raw) {
-  var col_id = raw.fields[0].id;
-  var player_names = [];
-  for (var i = 0; i < raw.records.length; i++) {
-    player_names[i] = raw.records[i][col_id];
-  }
-  return player_names;
+  return get_col(raw, 0);
 }
 
+// game_days[i] is the day in jth column
+function get_game_days(raw) {
+  return get_row(raw, 0);
+}
 
 function get_last_game(dp) {
   return get_game_info(dp, dp.raw.fields[dp.raw.fields.length - 1].id);
@@ -70,7 +77,7 @@ function get_last_game(dp) {
 function get_all_games(dp) {
   var fields = dp.raw.fields;
   var games = [];
-  for (var i = 4; i < fields.length; i++) {
+  for (var i = 1; i < fields.length; i++) {
     games.push(get_game_info(dp, fields[i].id));
   }
   return games;
@@ -84,16 +91,17 @@ function get_game_info(dp, ind) {
   var v = {};
   v['time'] = records[0][ind];
   v['score'] = records[1][ind];
-  var white_team = []; var color_team = [];
+  var white_team = []; var color_team = []; var nplayers = 0;
   for (i = 2; i < records.length; i++) {
     var side = records[i][ind].trim();
     var name = dp.player_names[i];
+    if (side && side != "0") nplayers++;
     if (side == 'W') white_team.push(name);
     else if (side == 'C') color_team.push(name);
     else if (side == 'WC' || side == 'CW') { white_team.push(name); color_team.push(name); }
   }
   v['white_team'] = white_team; v['color_team'] = color_team;
-  v['nplayers'] = dp.heads_count[dp.heads_count.length - 1].count;
+  v['nplayers'] = nplayers;
   return v;
 }
 
@@ -113,6 +121,17 @@ function get_win_side(str) {
   else return 'T';
 }
 
+// win_sides[time] = W|C|T
+function get_win_side_history(dp) {
+  var win_sides = {};
+  for (var i = 1; i < dp.raw.fields.length; i++) {
+    var ind = dp.raw.fields[i].id;
+    var time = dp.raw.records[0][ind];
+    win_sides[time] = get_win_side(dp.raw.records[1][ind]);
+  }
+  return win_sides;
+}
+
 // from the spreadsheet input
 // compute statistics for each player
 // player_stats[player_id] is a structure with 
@@ -127,10 +146,8 @@ function get_win_side(str) {
 //   acc_score, 
 //   impact_score
 // values[i] is ith player
-function compute_player_stats(raw) {
-  var playerSheet = SpreadsheetApp.openById('0ApIcf6jg2PQ4dEdTQVF6bHNRSUVKMy1wVm9CTXItNXc').getSheetByName('record');
-  var values = playerSheet.getDataRange().getValues();
-  Logger.log("col size: " + values[0].length)
+function compute_player_info(dp) {
+  var players = {};
   var start_col = 5;
   var to_col = values[0].length;
   var scores = [];

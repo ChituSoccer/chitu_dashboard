@@ -11,11 +11,11 @@ var dashboard1 = (function () {
 
     function createHeadsCountLineChart(selector) {
         $(selector).dxChart({
-            dataSource: dp.heads_count,
+            dataSource: dp.games,
             animation: { duration: 350 },
-            commonSeriesSettings: { argumentField: "week"},
+            commonSeriesSettings: { argumentField: "time"},
             series: [
-                { valueField: "count", name: "#" }
+                { valueField: "nplayers", name: "#" }
             ],
             argumentAxis: { grid: { visible: true } },
             tooltip: { enabled: true },

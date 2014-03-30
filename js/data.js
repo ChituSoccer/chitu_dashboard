@@ -29,9 +29,12 @@ gdocs.fetch({ url: chitu_pubdata_key }).done(function(result) {
 function create_data_products(raw) {
   var dp = {};
   dp.raw = raw;
+  dp.rows = get_rows(raw);
+  dp.cols = get_cols(raw);
   dp.player_names = get_player_names(raw);
   dp.game_days = get_game_days(raw);
-  dp.win_side_history = get_win_side_history(dp);
+  dp.win_sides = get_win_sides(dp);
+  dp.win_lose_matrix = get_win_lose_matrix(dp);
   dp.games = get_all_games(dp);
   dp.last_game = _.last(dp.games);
   return dp;
@@ -58,6 +61,12 @@ function get_col(raw, col_id) {
   return c;
 }
 
+function set_value(M, i, j, v) {
+  M.records[i][raw.fields[j].id] = v;
+}
+
+function get_rows(raw) { return raw.records.length; }
+function get_cols(raw) { return raw.fields.length; }
 
 // player_names[i] is the name of player in ith row
 function get_player_names(raw) {
@@ -121,20 +130,43 @@ function get_win_side(str) {
   else return 'T';
 }
 
-// win_sides[time] = W|C|T
-function get_win_side_history(dp) {
-  var win_sides = {};
-  for (var i = 1; i < dp.raw.fields.length; i++) {
-    var ind = dp.raw.fields[i].id;
-    var time = dp.raw.records[0][ind];
-    win_sides[time] = get_win_side(dp.raw.records[1][ind]);
+// win_sides[j] = W|C|T
+function get_win_sides(dp) {
+  var win_sides = [];
+  for (var i = 1; i < dp.cols; i++) {
+    win_sides[i] = get_win_side(get_value(dp.raw, 1, i));
   }
   return win_sides;
 }
 
+function get_win_lose_code(win_side, side) {
+  if (side) {
+    if (win_side == 'T') return 'T';
+    if (side == 'CW' || side == 'WC') return 'T';
+    if (win_side == side) return 'W';
+    return 'L';
+  } else return "";
+}
+
+// wlm[i][j] = W|L|T|"" for ith player and jth game
+function get_win_lose_matrix(dp) {
+  var wlm = [];
+  for (var i = 2; i < dp.rows; i++) {
+    var r = [];
+    for (var j = 1; j < dp.cols; j++) {
+      r[j] = get_win_lose_code(dp.win_sides[j], get_value(dp.raw, i, j));
+    }
+    wlm[i] = r;
+  }
+  return wlm;
+}
+
 // from the spreadsheet input
 // compute statistics for each player
-// player_stats[player_id] is a structure with 
+// players[i] is a structure with 
+//   id     index in raw's row
+//   name   first column data
+//   game_indices[k]
 //   attend_day_history,
 //   team_side_history,
 //   win_lose_history,
@@ -146,8 +178,8 @@ function get_win_side_history(dp) {
 //   acc_score, 
 //   impact_score
 // values[i] is ith player
-function compute_player_info(dp) {
-  var players = {};
+function get_players(dp) {
+  var players = [];
   var start_col = 5;
   var to_col = values[0].length;
   var scores = [];

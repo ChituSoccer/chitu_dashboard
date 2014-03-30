@@ -25,9 +25,9 @@ var dashboard1 = (function () {
         });
     }
     
-    var last_game_tmpl = _.template($('#last_game_tmpl').html());
+    var game_tmpl = _.template($('#game_tmpl').html());
     function createLastGameWidget(selector) {
-      $(selector).html(last_game_tmpl(dp['last_game']));
+      $(selector).html(game_tmpl(dp['last_game']));
     }
 
     function render() {

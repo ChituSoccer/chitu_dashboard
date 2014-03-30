@@ -1,80 +1,33 @@
-var chitu_pubdata_key = '0ApIcf6jg2PQ4dEFNTFo2NTl2NzcwQUVaQmJwbklBN1E';
-var dp = {};
-gdocs.fetch({ url: chitu_pubdata_key }).done(function(result) {
-    // structure of result is below
-    console.log(result);
-    //raw = result;
-    dp = create_data_products(result);
-    dashboard1.render();
-});
-
-// raw
-// fields: names for each column
-// records: field-name: value
-
-function create_data_products(raw) {
-  var dp = {};
-  dp['heads_count'] = create_head_counts(raw);
-  return dp;
-}
-
-// for every column, add up non-zero items
-function create_head_counts(raw) {
-  var heads_count = [];
-  for (var i = 4; i < raw.fields.length; i++) {
-    var n = 0;
-    var name = raw.fields[i].id;
-    for (var j = 2; j < raw.records.length; j++) {
-      var v = raw.records[j][name].trim();
-      if (v && v != "0") n++;
-    }
-    heads_count[i-4] = {"week":raw.records[0][name].trim(), "count":n};
-  }
-  return heads_count;
-}
+// widgets:
+//   1. heads count line chart
+//   2. latest game stats: score, heads count, attendees
+//   3. leaderboard, monthly, quarterly, yearly; accu score, impact score
+//   4. player stats board
+//   6. 
 
 var dashboard1 = (function () {
 
     "use strict";
 
-    function createLineChart(selector) {
+    function createHeadsCountLineChart(selector) {
         $(selector).dxChart({
             dataSource: dp.heads_count,
-            //dataSource: summary,
-            animation: {
-                duration: 350
-            },
-            commonSeriesSettings: {
-                argumentField: "week"
-            },
+            animation: { duration: 350 },
+            commonSeriesSettings: { argumentField: "week"},
             series: [
                 { valueField: "count", name: "#" }
             ],
-            argumentAxis: {
-                grid: {
-                    visible: true
-                }
-            },
-            tooltip: {
-                enabled: true
-            },
-            title: {
-                text: "Heads Count",
-                font: {
-                    size: "24px"
-                }
-            },
-            legend: {
-                verticalAlignment: "bottom",
-                horizontalAlignment: "center"
-            },
-            commonPaneSettings: {
-                border: {
-                    visible: true,
-                    right: false
-                }
-            }
+            argumentAxis: { grid: { visible: true } },
+            tooltip: { enabled: true },
+            title: { text: "Heads Count", font: { size: "24px" } },
+            legend: { verticalAlignment: "bottom", horizontalAlignment: "center" },
+            commonPaneSettings: { border: { visible: true, right: false } }
         });
+    }
+    
+    var last_game_tmpl = _.template($('#last_game_tmpl').html());
+    function createLastGameWidget(selector) {
+      $(selector).html(last_game_tmpl(dp['last_game']));
     }
 
     function render() {
@@ -85,7 +38,8 @@ var dashboard1 = (function () {
 
         $("#content").html(html);
 
-        createLineChart('#chart1');
+        createLastGameWidget('#chart1');
+        createHeadsCountLineChart('#chart2');
         //createBarChart('#chart2');
 
     }

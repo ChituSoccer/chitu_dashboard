@@ -21,6 +21,42 @@ gdocs.fetch({ url: chitu_pubdata_key }).done(function(result) {
     dashboard1.render();
 });
 
+// i-th row, j-th col, start from 0
+function get_raw_value(raw, i, j) {
+  return raw.records[i][raw.fields[j].id];
+}
+
+function get_raw_rows(raw) { return raw.records.length; }
+function get_raw_cols(raw) { return raw.fields.length; }
+
+function get_raw_row(raw, row_ind) {
+  var r = [];
+  for (var i = 0; i < raw.fields.length; i++) {
+    r[i] = get_raw_value(raw, row_ind, i);
+  }
+  return r;
+}
+
+function get_raw_col(raw, col_id) {
+  var c = [];
+  for (var i = 0; i < raw.records.length; i++) {
+    c[i] = get_raw_value(raw, i, col_id);
+  }
+  return c;
+}
+
+
+// convert gdocs input data to a 2d array
+// omat[i][j] = raw.records[i][raw.fields[j].id]
+function get_omat(raw) {
+  var omat = [];
+  var rows = get_raw_rows(raw);
+  for (var i = 0; i < rows; i++) {
+    omat[i] = get_raw_row(raw, i);
+  }
+  return omat;
+}
+
 // raw
 // fields: ids for each column
 // records: field_id: value
@@ -29,54 +65,28 @@ gdocs.fetch({ url: chitu_pubdata_key }).done(function(result) {
 function create_data_products(raw) {
   var dp = {};
   dp.raw = raw;
-  dp.rows = get_rows(raw);
-  dp.cols = get_cols(raw);
-  dp.player_names = get_player_names(raw);
-  dp.game_days = get_game_days(raw);
+  dp.rows = get_raw_rows(raw);
+  dp.cols = get_raw_cols(raw);
+  dp.omat = get_omat(raw);
+  dp.player_names = get_player_names(dp);
+  dp.game_days = get_game_days(dp);
   dp.win_sides = get_win_sides(dp);
   dp.win_lose_matrix = get_win_lose_matrix(dp);
   dp.games = get_all_games(dp);
   dp.last_game = _.last(dp.games);
+  dp.players = get_players(dp);
   return dp;
-}
-
-// i-th row, j-th col, start from 0
-function get_value(raw, i, j) {
-  return raw.records[i][raw.fields[j].id];
-}
-
-function get_row(raw, row_ind) {
-  var r = [];
-  for (var i = 0; i < raw.fields.length; i++) {
-    r[i] = get_value(raw, row_ind, i);
-  }
-  return r;
-}
-
-function get_col(raw, col_id) {
-  var c = [];
-  for (var i = 0; i < raw.records.length; i++) {
-    c[i] = get_value(raw, i, col_id);
-  }
-  return c;
 }
 
 function set_value(M, i, j, v) {
   M.records[i][raw.fields[j].id] = v;
 }
 
-function get_rows(raw) { return raw.records.length; }
-function get_cols(raw) { return raw.fields.length; }
-
 // player_names[i] is the name of player in ith row
-function get_player_names(raw) {
-  return get_col(raw, 0);
-}
+function get_player_names(dp) { return get_raw_col(dp.raw, 0); }
 
 // game_days[i] is the day in jth column
-function get_game_days(raw) {
-  return get_row(raw, 0);
-}
+function get_game_days(dp) { return dp.omat[0]; }
 
 function get_last_game(dp) {
   return get_game_info(dp, dp.raw.fields[dp.raw.fields.length - 1].id);
@@ -92,7 +102,7 @@ function get_all_games(dp) {
   return games;
 }
 
-// time, score, white_team[i], color_team[i]
+// time, score, white_team[i], color_team[i], nplayers
 function get_game_info(dp, ind) {
   var raw = dp.raw;
   var fields = raw.fields;
@@ -120,33 +130,34 @@ function get_game_info(dp, ind) {
 //   W2:C4 -> 'C'
 //   W2:C2 -> 'T'
 function get_win_side(str) {
-  var ss = str.split(':');
-  var n = {};
-  for (var i = 0; i < ss.length; i++) {
-    n[ss[i].charAt(0)] = parseInt(ss[i].substring(1));
-  }
-  if (n['W'] > n['C']) return 'W';
-  else if (n['W'] < n['C']) return 'C';
-  else return 'T';
+  if (str) {
+    var ss = str.split(':');
+    var n = {};
+    for (var i = 0; i < ss.length; i++) {
+      n[ss[i].charAt(0)] = parseInt(ss[i].substring(1));
+    }
+    if (n['W'] > n['C']) return 'W';
+    else if (n['W'] < n['C']) return 'C';
+    else return 'T';
+  } else { return 'T'; }
 }
 
 // win_sides[j] = W|C|T
 function get_win_sides(dp) {
-  var win_sides = [];
-  for (var i = 1; i < dp.cols; i++) {
-    win_sides[i] = get_win_side(get_value(dp.raw, 1, i));
-  }
-  return win_sides;
+  return _.map(dp.omat[1], get_win_side);
 }
+
+var win_lose_code_table = { 'W': 'win', 'L': 'lose', 'T': 'tie', 'S': 'switch' };
 
 function get_win_lose_code(win_side, side) {
   if (side) {
     if (win_side == 'T') return 'T';
-    if (side == 'CW' || side == 'WC') return 'T';
+    if (side == 'CW' || side == 'WC') return 'S';
     if (win_side == side) return 'W';
     return 'L';
   } else return "";
 }
+
 
 // wlm[i][j] = W|L|T|"" for ith player and jth game
 function get_win_lose_matrix(dp) {
@@ -154,11 +165,15 @@ function get_win_lose_matrix(dp) {
   for (var i = 2; i < dp.rows; i++) {
     var r = [];
     for (var j = 1; j < dp.cols; j++) {
-      r[j] = get_win_lose_code(dp.win_sides[j], get_value(dp.raw, i, j));
+      r[j] = get_win_lose_code(dp.win_sides[j], get_raw_value(dp.raw, i, j));
     }
     wlm[i] = r;
   }
   return wlm;
+}
+
+function arr_slice(arr, indices) {
+  return _.map(indices, function(i) { return arr[i]; });
 }
 
 // from the spreadsheet input
@@ -178,42 +193,40 @@ function get_win_lose_matrix(dp) {
 //   acc_score, 
 //   impact_score
 // values[i] is ith player
+function get_player_info(dp, i) {
+  var player = {};
+  player.id = i;
+  player.name = dp.player_names[i];
+  var game_indices = [];
+  var all_sides = dp.omat[i];
+  for (var j = 1; j < dp.cols; j++) { if (all_sides[j] && all_sides[j] != '0') { game_indices.push(j); } }
+  player.game_indices = game_indices;
+  player.attend_days = arr_slice(dp.omat[0], game_indices);
+  player.sides = arr_slice(dp.omat[i], game_indices);
+  player.win_lose_codes = arr_slice(dp.win_lose_matrix[i], game_indices);
+  player.wl_counts = get_win_lose_counts(player.win_lose_codes);
+  player.scores = get_scores(player.wl_counts);
+  player.side_counts = _.countBy(player.sides, function(c) {return c;});
+  return player;
+}
+
+function get_win_lose_counts(win_lose_codes) {
+  return _.countBy(win_lose_codes, function(c) { return win_lose_code_table[c]; });
+}
+
+function get_scores(wl_counts) {
+  var total = 0; var avg = 0; var acc = 0;
+  if (wl_counts.win) { total += wl_counts.win; acc += 3 * wl_counts.win; }
+  if (wl_counts.tie) { total += wl_counts.tie; acc += 1.5 * wl_counts.tie; }
+  if (wl_counts['switch']) { var n = wl_counts['switch']; total += n; acc += 1.5 * n; }
+  if (wl_counts.lose) { var n = wl_counts.lose; total += n; acc += 0; }
+  return { 'acc': acc, 'impact': (acc + 3) / (total + 3) };  
+}
+
 function get_players(dp) {
   var players = [];
-  var start_col = 5;
-  var to_col = values[0].length;
-  var scores = [];
-  for (var i = 2; i < values.length; i++) {
-    //var name = values[i][1];
-    var name = getShortName(values[i][1]);
-    var attend_count = 0;
-    var win_count = 0; 
-    var draw_count = 0;  
-    var switch_count = 0;  // label is CW or WC
-    var loss_count = 0;
-    //Logger.log(name);
-    for (var j = start_col; j < to_col; j++) {
-      var winSide = getWinSide(values[1][j]);
-      //Logger.log(values[1][j] + ', win side: ' + winSide);
-      var v = values[i][j];
-      if (v == 0) continue;
-      attend_count++;
-      if (winSide == 'O') draw_count++;
-      else {
-        if (v == 'CW' || v == 'WC') switch_count++;
-        else if (v == winSide) win_count++;
-        else loss_count++;
-      }
-      //Logger.log(v);
-    }
-    var navg_score = (win_count * 3 + draw_count * 1 + switch_count * 1.5 + 3) / (attend_count+3);
-    var acc_score = win_count * 3 + (draw_count + switch_count) * 2 + loss_count;
-    var score = {'name': name, 'attend': attend_count, 'win': win_count, 'loss': loss_count,
-                 'draw': draw_count, 'switch': switch_count, 'navg': navg_score, 'acc': acc_score}
-    scores[i-2] = score;
-    //Logger.log(JSON.stringify(score));
-  }
-  return scores;
+  for (i = 2; i < dp.rows; i++) players[i] = get_player_info(dp, i);
+  return players;
 }
 
 var comments = {};

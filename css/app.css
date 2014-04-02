@@ -155,3 +155,11 @@ li.player {
   padding: 10px;
   font-size: 8pt;
 }
+
+#game-table {
+  width: 600px;
+  height: 400px;
+  float: left;
+  padding: 10px;
+  font-size: 8pt;
+}

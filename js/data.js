@@ -10,15 +10,19 @@
 //   d[i][j] is W/L/T for ith-player and j-th day
 //           
 
+function load_data(on_ready) {
+
 var chitu_pubdata_key = '0ApIcf6jg2PQ4dEFNTFo2NTl2NzcwQUVaQmJwbklBN1E';
 
-var dp = {};
 gdocs.fetch({ url: chitu_pubdata_key }).done(function(result) {
     // structure of result is below
     console.log(result);
     //raw = result;
-    dp = create_data_products(result);
-    dashboard1.render();
+    var dp = create_data_products(result);
+    window.dp = dp;
+    //dashboard1.render();
+    on_ready();
+    //window.update_on_hash();
 });
 
 // i-th row, j-th col, start from 0
@@ -75,6 +79,7 @@ function create_data_products(raw) {
   dp.games = get_all_games(dp);
   dp.last_game = _.last(dp.games);
   dp.players = get_players(dp);
+  dp.ngames = dp.games.slice(1, dp.games.length);
   dp.nplayers = dp.players.slice(2, dp.players.length);
   return dp;
 }
@@ -108,9 +113,10 @@ function get_game_info(dp, ind) {
   var raw = dp.raw;
   var fields = raw.fields;
   var records = raw.records;
-  var v = {};
-  v['time'] = records[0][ind];
-  v['score'] = records[1][ind];
+  var game = {};
+  game.id = ind;
+  game.time = records[0][ind];
+  game.score = records[1][ind];
   var white_team = []; var color_team = []; var nplayers = 0;
   for (i = 2; i < records.length; i++) {
     var side = records[i][ind].trim();
@@ -120,8 +126,9 @@ function get_game_info(dp, ind) {
     else if (side == 'C') color_team.push(name);
     else if (side == 'WC' || side == 'CW') { white_team.push(name); color_team.push(name); }
   }
-  v['white_team'] = white_team; v['color_team'] = color_team;
-  v['nplayers'] = nplayers;
+  game.white_team = white_team; 
+  game.color_team = color_team;
+  game.nplayers = nplayers;
   return v;
 }
 
@@ -236,3 +243,4 @@ function get_players(dp) {
 var comments = {};
 comments['3/29/2014']['CL'] = '少父聊发中年狂，左牵黄，右擎苍。弃帽脱裘，健骑卷平冈。欲沐春露驭赤兔，亲射虎，看李郎。'
 　　 + '雨酣胸胆尚开张，鬓微霜，又何妨！持球泥中，今日过冯唐！会挽雕弓如满月，西北望，射天狼。';
+}

@@ -10,19 +10,19 @@ var dashboard1 = (function () {
     "use strict";
 
     function createHeadsCountLineChart(selector) {
-        $(selector).dxChart({
-            dataSource: dp.games,
-            animation: { duration: 350 },
-            commonSeriesSettings: { argumentField: "time"},
-            series: [
-                { valueField: "nplayers", name: "#" }
-            ],
-            argumentAxis: { grid: { visible: true } },
-            tooltip: { enabled: true },
-            title: { text: "Heads Count", font: { size: "24px" } },
-            legend: { verticalAlignment: "bottom", horizontalAlignment: "center" },
-            commonPaneSettings: { border: { visible: true, right: false } }
-        });
+      $(selector).dxChart({
+        dataSource: dp.games,
+        animation: { duration: 350 },
+        commonSeriesSettings: { argumentField: "time"},
+        series: [
+            { valueField: "nplayers", name: "#" }
+        ],
+        argumentAxis: { grid: { visible: true } },
+        tooltip: { enabled: true },
+        title: { text: "Heads Count", font: { size: "24px" } },
+        legend: { verticalAlignment: "bottom", horizontalAlignment: "center" },
+        commonPaneSettings: { border: { visible: true, right: false } }
+      });
     }
     
     var game_tmpl = _.template($('#game_tmpl').html());
@@ -50,7 +50,22 @@ var dashboard1 = (function () {
 
 }());
 
-var dashboard2 = (function () {
+var slickgrid_sorter = function(cols) {
+  return function (dataRow1, dataRow2) {
+    for (var i = 0, l = cols.length; i < l; i++) {
+      var field = cols[i].sortCol.field;
+      var sign = cols[i].sortAsc ? 1 : -1;
+      var value1 = dataRow1[field], value2 = dataRow2[field];
+      var result = (value1 == value2 ? 0 : (value1 > value2 ? 1 : -1)) * sign;
+      if (result != 0) {
+        return result;
+      }
+    }
+    return 0;
+  };
+};
+        
+var dashboard_players = (function () {
 
     "use strict";
     
@@ -78,32 +93,66 @@ var dashboard2 = (function () {
       grid = new Slick.Grid(selector, dp.nplayers, columns, options);
       
       grid.onSort.subscribe(function (e, args) {
-      var cols = args.sortCols;
+        var cols = args.sortCols;
 
-      dp.nplayers.sort(function (dataRow1, dataRow2) {
-        for (var i = 0, l = cols.length; i < l; i++) {
-          var field = cols[i].sortCol.field;
-          var sign = cols[i].sortAsc ? 1 : -1;
-          var value1 = dataRow1[field], value2 = dataRow2[field];
-          var result = (value1 == value2 ? 0 : (value1 > value2 ? 1 : -1)) * sign;
-          if (result != 0) {
-            return result;
-          }
-        }
-        return 0;
-      });        grid.invalidateAllRows();
+        dp.nplayers.sort(slickgrid_sorter(cols));        
+        grid.invalidateAllRows();
         grid.render();
       });
     }
 
     function render() {
 
-        var html =
-            '<div id="players-table"></div>';
+      var html = '<div id="players-table"></div>';
 
-        $("#content").html(html);
+      $("#content").html(html);
 
-        createPlayersTable('#players-table');
+      createPlayersTable('#players-table');
+    }
+
+    return {
+        render: render
+    }
+
+}());
+
+var dashboard_games = (function () {
+
+    "use strict";
+    
+    function createGamesTable(selector) {
+      var grid;
+      var columns = [
+        {id: "id", name: "ID", field: "id", sortable: true },
+        {id: "time", name: "Time", field: "time", sortable: true },
+        {id: "score", name: "Score", field: "score", sortable: true },
+        {id: "nplayers", name: "# Players", field: "nplayers", sortable: true}
+      ];
+
+      var options = {
+        enableCellNavigation: true,
+        enableColumnReorder: false,
+        multiColumnSort: true
+      };
+
+      grid = new Slick.Grid(selector, dp.ngames, columns, options);
+      
+      grid.onSort.subscribe(function (e, args) {
+        var cols = args.sortCols;
+
+        dp.ngames.sort(slickgrid_sorter(cols));        
+        grid.invalidateAllRows();
+        grid.render();
+      });
+    }
+
+    function render() {
+
+      var html = '<div id="games-table"></div>';
+
+      $("#content").html(html);
+
+      createPlayersTable('#games-table');
     }
 
     return {

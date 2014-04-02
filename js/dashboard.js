@@ -49,3 +49,66 @@ var dashboard1 = (function () {
     }
 
 }());
+
+var dashboard2 = (function () {
+
+    "use strict";
+    
+    function createPlayersTable(selector) {
+      var grid;
+      var columns = [
+        {id: "id", name: "ID", field: "id", sortable: true },
+        {id: "name", name: "Name", field: "name", sortable: true },
+        {id: "acc", name: "Acc. Score", field: "acc", sortable: true },
+        {id: "impact", name: "Effectiveness", field: "impact", sortable: true},
+        {id: "attend", name: "Attend", field: "attend", sortable: true},
+        {id: "white", name: "White", field: "W", sortable: true},
+        {id: "color", name: "Color", field: "C", sortable: true},
+        {id: "win", name: "Win", field: "win", sortable: true},
+        {id: "lose", name: "Lose", field: "lose", sortable: true},
+        {id: "tie", name: "Tie", field: "tie", sortable: true}
+      ];
+
+      var options = {
+        enableCellNavigation: true,
+        enableColumnReorder: false,
+        multiColumnSort: true
+      };
+
+      grid = new Slick.Grid(selector, dp.nplayers, columns, options);
+      
+      grid.onSort.subscribe(function (e, args) {
+      var cols = args.sortCols;
+
+      dp.nplayers.sort(function (dataRow1, dataRow2) {
+        for (var i = 0, l = cols.length; i < l; i++) {
+          var field = cols[i].sortCol.field;
+          var sign = cols[i].sortAsc ? 1 : -1;
+          var value1 = dataRow1[field], value2 = dataRow2[field];
+          var result = (value1 == value2 ? 0 : (value1 > value2 ? 1 : -1)) * sign;
+          if (result != 0) {
+            return result;
+          }
+        }
+        return 0;
+      });        grid.invalidateAllRows();
+        grid.render();
+      });
+    }
+
+    function render() {
+
+        var html =
+            '<div id="players-table"></div>';
+
+        $("#content").html(html);
+
+        createPlayersTable('#players-table');
+    }
+
+    return {
+        render: render
+    }
+
+}());
+

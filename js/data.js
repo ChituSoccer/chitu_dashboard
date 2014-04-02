@@ -75,6 +75,7 @@ function create_data_products(raw) {
   dp.games = get_all_games(dp);
   dp.last_game = _.last(dp.games);
   dp.players = get_players(dp);
+  dp.nplayers = dp.players.slice(2, dp.players.length);
   return dp;
 }
 
@@ -204,9 +205,12 @@ function get_player_info(dp, i) {
   player.attend_days = arr_slice(dp.omat[0], game_indices);
   player.sides = arr_slice(dp.omat[i], game_indices);
   player.win_lose_codes = arr_slice(dp.win_lose_matrix[i], game_indices);
-  player.wl_counts = get_win_lose_counts(player.win_lose_codes);
-  player.scores = get_scores(player.wl_counts);
-  player.side_counts = _.countBy(player.sides, function(c) {return c;});
+  var wl_counts = get_win_lose_counts(player.win_lose_codes);
+  var scores = get_scores(wl_counts);
+  var side_counts = _.countBy(player.sides, function(c) {return c;});
+  player.attend = game_indices.length;
+  player = $.extend({}, player, wl_counts, scores, side_counts);
+  
   return player;
 }
 

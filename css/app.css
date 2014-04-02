@@ -147,3 +147,11 @@ li.player {
   border-radius: 5px;
   -webkit-border-radius: 5px;
 }
+
+#players-table {
+  width: 800px;
+  height: 600px;
+  float: left;
+  padding: 10px;
+  font-size: 8pt;
+}

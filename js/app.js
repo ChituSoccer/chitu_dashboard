@@ -22,9 +22,9 @@
     var hash = window.location.hash;
     if (hash === "#dashboard/1") {
         dashboard1.render();
-    } else if (hash === "#dashboard/2") {
+    } else if (hash === "#dashboard/games") {
         dashboard_games.render();
-    } else if (hash === "#dashboard/3") {
+    } else if (hash === "#dashboard/players") {
         dashboard_players.render();
     }
   }

@@ -152,7 +152,7 @@ var dashboard_games = (function () {
 
       $("#content").html(html);
 
-      createPlayersTable('#games-table');
+      createGamesTable('#games-table');
     }
 
     return {

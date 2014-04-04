@@ -14,16 +14,31 @@ function load_data(on_ready) {
 
 var chitu_pubdata_key = '0ApIcf6jg2PQ4dEFNTFo2NTl2NzcwQUVaQmJwbklBN1E';
 
-gdocs.fetch({ url: chitu_pubdata_key }).done(function(result) {
-    // structure of result is below
-    console.log(result);
-    //raw = result;
-    var dp = create_data_products(result);
-    window.dp = dp;
-    //dashboard1.render();
-    on_ready();
-    //window.update_on_hash();
+/*
+gdocs.fetch({ url: chitu_pubdata_key }).done(function(raw) {
+  // structure of result is below
+  console.log('successfully load raw data from gdocs');
+  $.jStorage.set('raw', raw);
+  on_raw_loaded(raw);
+}).fail(function() {
+  console.log('failed to connect to gdocs');
+  var raw = $.jStorage.get('raw');
+  on_raw_loaded(raw);
 });
+*/
+
+  var raw = $.jStorage.get('raw');
+  on_raw_loaded(raw);
+
+function on_raw_loaded(raw) {
+  console.log('on raw loaded .....');
+  var dp = create_data_products(raw);
+  window.dp = dp;
+  //dashboard1.render();
+  console.log('ready');
+  on_ready();
+  //window.update_on_hash();
+}
 
 // i-th row, j-th col, start from 0
 function get_raw_value(raw, i, j) {
@@ -129,7 +144,7 @@ function get_game_info(dp, ind) {
   game.white_team = white_team; 
   game.color_team = color_team;
   game.nplayers = nplayers;
-  return v;
+  return game;
 }
 
 // return 'W', 'C' or 'T' (for tie)
@@ -222,6 +237,7 @@ function get_player_info(dp, i) {
 }
 
 function get_win_lose_counts(win_lose_codes) {
+  var win_lose_code_table = { 'W': 'win', 'L': 'lose', 'T': 'tie', 'S': 'switch' };
   return _.countBy(win_lose_codes, function(c) { return win_lose_code_table[c]; });
 }
 
@@ -240,7 +256,7 @@ function get_players(dp) {
   return players;
 }
 
-var comments = {};
-comments['3/29/2014']['CL'] = '少父聊发中年狂，左牵黄，右擎苍。弃帽脱裘，健骑卷平冈。欲沐春露驭赤兔，亲射虎，看李郎。'
-　　 + '雨酣胸胆尚开张，鬓微霜，又何妨！持球泥中，今日过冯唐！会挽雕弓如满月，西北望，射天狼。';
+//var comments = {};
+//comments['3/29/2014']['CL'] = '少父聊发中年狂，左牵黄，右擎苍。弃帽脱裘，健骑卷平冈。欲沐春露驭赤兔，亲射虎，看李郎。'
+//　　 + '雨酣胸胆尚开张，鬓微霜，又何妨！持球泥中，今日过冯唐！会挽雕弓如满月，西北望，射天狼。';
 }

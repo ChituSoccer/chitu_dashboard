@@ -115,26 +115,23 @@ function get_last_game(dp) {
 
 // array
 function get_all_games(dp) {
-  var fields = dp.raw.fields;
   var games = [];
-  for (var i = 1; i < fields.length; i++) {
-    games.push(get_game_info(dp, fields[i].id));
+  for (var i = 1; i < dp.cols; i++) {
+    games.push(get_game_info(dp, i));
   }
   return games;
 }
 
 // time, score, white_team[i], color_team[i], nplayers
 function get_game_info(dp, ind) {
-  var raw = dp.raw;
-  var fields = raw.fields;
-  var records = raw.records;
+  var omat = dp.omat;
   var game = {};
   game.id = ind;
-  game.time = records[0][ind];
-  game.score = records[1][ind];
+  game.time = omat[0][ind];
+  game.score = omat[1][ind];
   var white_team = []; var color_team = []; var nplayers = 0;
-  for (i = 2; i < records.length; i++) {
-    var side = records[i][ind].trim();
+  for (i = 2; i < dp.rows; i++) {
+    var side = omat[i][ind].trim();
     var name = dp.player_names[i];
     if (side && side != "0") nplayers++;
     if (side == 'W') white_team.push(name);

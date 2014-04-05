@@ -164,7 +164,7 @@
 }
 
 .player-profile .chart {
-  height: 350px;
+  min-height: 200px;
   float: left;
   padding: 10px;
 }

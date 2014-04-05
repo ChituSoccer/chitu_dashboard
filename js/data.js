@@ -91,6 +91,7 @@ function create_data_products(raw) {
   dp.players = get_players(dp);
   dp.ngames = dp.games.slice(1, dp.games.length);
   dp.nplayers = dp.players.slice(2, dp.players.length);
+  dp.nplayers_by_score = get_players_by_score(dp.nplayers);
   return dp;
 }
 
@@ -246,6 +247,14 @@ function get_players(dp) {
   var players = [];
   for (i = 2; i < dp.rows; i++) players[i] = get_player_info(dp, i);
   return players;
+}
+
+function get_players_by_score(players) {
+  var players_by_score = {};
+  _.each(["acc", "impact", "attend"], function(score_type) {
+    players_by_score[score_type] = _.sortBy(players, score_type).reverse();
+  });
+  return players_by_score;
 }
 
 //var comments = {};

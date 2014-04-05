@@ -50,6 +50,7 @@
     <div class="row-fluid">
       <div class="col-sm-8">
         <div id="game_boards"></div>
+        <div id="leaderboards"></div>
       </div>
       <div class="col-sm-4">
         <div id="heads_count"></div>
@@ -58,37 +59,64 @@
   </script>
 
   <script type="text/template" id="game_tmpl">
-    <div class="row">
-      <div class = "col-md-12" id="game_title">Game(<%= time %>)</div>
+    <div class="row-fluid">
+      <div class = "col-md-12 boards-title">Game(<%= time %>)</div>
     </div>
     <div class="row-fluid">
       <div class="col-sm-4" id="game-stats">
-        <div class="game-board">
-          <div class="team-title">Score</div>
+        <div class="board">
+          <div class="board-title">Score</div>
           <div id="score"><%= score %></div>
           <div id="count"><%= nplayers %> players</div>
         </div>
       </div>
       <div class="col-sm-4">
-        <div class="game-board">
-          <div class="team-title">White Team</div>
+        <div class="board">
+          <div class="board-title">White Team</div>
           <ul class="players">
             <% _.each(white_team, function(name) { %>
-              <li class="player" id="player-<%- name %>"><%- name %></li>
+              <li><a href="#players/<%- name %>"><%- name %></a></li>
             <% }); %>
           </ul>
         </div>
       </div>
       <div class="col-sm-4">
-        <div class="game-board">
-          <div class="team-title">Color Team</div>
+        <div class="board">
+          <div class="board-title">Color Team</div>
           <ul class="players">
             <% _.each(color_team, function(name) { %>
-              <li class="player" id="player-<%- name %>"><%- name %></li>
+              <li><a href="#players/<%- name %>"><%- name %></a></li>
             <% }); %>
           </ul>
         </div>
       </div>
+    </div>
+  </script>
+  
+  <script type="text/template" id="leaderboard_tmpl">
+    <div class="board">
+      <div class="board-title"><%= score_type %></div>
+        <ul class="players-scores">
+          <% _.each(players, function(player) { %>
+            <li class="player-score">
+              <a href="#players/<%- player.id %>"><%- player.name %></a>
+              <span class="score"><%- player[score_type].toPrecision(3) %></span>
+            </li>
+          <% }); %>
+        </ul>
+    </div>
+  </script>
+  
+  <script type="text/template" id="leaderboards_tmpl">
+    <div class="row-fluid">
+      <div class="col-md-12 boards-title">Leaderboards</div>
+    </div>
+    <div class="row-fluid">
+      <% _.each(["acc", "impact", "attend"], function(score_type) { %>
+        <div class="col-sm-4">
+          <% print(leaderboard_tmpl({"score_type": score_type, "players": dp.nplayers_by_score[score_type]})); %>
+        </div>
+      <% }); %>
     </div>
   </script>
   
@@ -100,6 +128,7 @@
   <script src="libs/chartjs/dx.chartjs.js"></script>
   <script src="libs/gdocs.js"></script>
   <script src="libs/jstorage.js"></script>
+  <script src="libs/readmore.min.js"></script>
   
   <link rel="stylesheet" href="libs/slickgrid/css/smoothness/jquery-ui-1.8.16.custom.css" type="text/css"/>
   <script src="libs/slickgrid/lib/jquery.event.drag-2.2.js"></script>

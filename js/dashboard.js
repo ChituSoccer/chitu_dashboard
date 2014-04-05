@@ -7,44 +7,55 @@
 
 var dashboard1 = (function () {
 
-    "use strict";
+  "use strict";
 
-    function createHeadsCountLineChart(selector) {
-      $(selector).dxChart({
-        dataSource: dp.games,
-        animation: { duration: 350 },
-        commonSeriesSettings: { argumentField: "time"},
-        series: [
-            { valueField: "nplayers", name: "#" }
-        ],
-        argumentAxis: { grid: { visible: true } },
-        tooltip: { enabled: true },
-        title: { text: "Heads Count", font: { size: "24px" } },
-        legend: { verticalAlignment: "bottom", horizontalAlignment: "center" },
-        commonPaneSettings: { border: { visible: true, right: false } }
+  function createHeadsCountLineChart(selector) {
+    $(selector).dxChart({
+      dataSource: dp.games,
+      animation: { duration: 350 },
+      commonSeriesSettings: { argumentField: "time"},
+      series: [
+          { valueField: "nplayers", name: "#" }
+      ],
+      argumentAxis: { grid: { visible: true } },
+      tooltip: { enabled: true },
+      title: { text: "Heads Count", font: { size: "24px" } },
+      legend: { verticalAlignment: "bottom", horizontalAlignment: "center" },
+      commonPaneSettings: { border: { visible: true, right: false } }
+    });
+  }
+  
+  var game_tmpl = _.template($('#game_tmpl').html());
+  function createLastGameWidget(selector) {
+    $(selector).html(game_tmpl(dp['last_game']));
+  }
+
+  var leaderboard_tmpl = _.template($('#leaderboard_tmpl').html());
+  var leaderboards_tmpl = _.template($('#leaderboards_tmpl').html());
+  
+  function createLeaderboardsWidget(selector) {
+    $(selector).html(leaderboards_tmpl({ 'leaderboard_tmpl': leaderboard_tmpl, 'dp': dp}));
+      $('ul.players-scores').readmore({
+        speed: 500,
+        maxHeight: 200,
+        moreLink: '<a href="#">More &gt&gt </a>',
+        lessLink: '<a href="#">Less &lt&lt</a>'
       });
-    }
-    
-    var game_tmpl = _.template($('#game_tmpl').html());
-    function createLastGameWidget(selector) {
-      $(selector).html(game_tmpl(dp['last_game']));
-    }
+  }
+  
+  function render() {
 
-    function render() {
+    var html = $('#dashboard_tmpl').html();
 
-        var html = $('#dashboard_tmpl').html();
+    $("#content").html(html);
 
-        $("#content").html(html);
+    createLastGameWidget('#game_boards');
+    createHeadsCountLineChart('#heads_count');
+    createLeaderboardsWidget('#leaderboards');
+    //createBarChart('#chart2');
+  }
 
-        createLastGameWidget('#game_boards');
-        createHeadsCountLineChart('#heads_count');
-        //createBarChart('#chart2');
-
-    }
-
-    return {
-        render: render
-    }
+  return { render: render }
 
 }());
 

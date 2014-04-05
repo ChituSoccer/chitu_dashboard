@@ -97,23 +97,24 @@
 
 }
 
-#game_title {
+.boards-title {
   font-size: 24px;
   text-align: center;
   margin: 10px;
 }
 
-.game-board {
+.board {
   border: solid 1px;
   padding: 0;
   min-height: 160px;
+  overflow: hidden;
 }
 
 #game-stats {
   text-align: center;
 }
 
-.team-title {
+.board-title {
   text-align: center;
   color: white;
   background: #315C57;
@@ -126,7 +127,7 @@
   margin-bottom: 15px;
 }
 
-li.player {
+.players li {
   float:left;
   margin: 5px;
   background: #A9EEE6;
@@ -151,4 +152,12 @@ li.player {
   float: left;
   padding: 10px;
   font-size: 8pt;
+}
+
+.player-score {
+  padding-left: 10px;
+  padding-right: 10px; 
+}
+.player-score .score {
+  float:right;
 }

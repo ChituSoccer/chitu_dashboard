@@ -14,21 +14,16 @@ function load_data(on_ready) {
 
 var chitu_pubdata_key = '0ApIcf6jg2PQ4dEFNTFo2NTl2NzcwQUVaQmJwbklBN1E';
 
-/*
+
 gdocs.fetch({ url: chitu_pubdata_key }).done(function(raw) {
   // structure of result is below
   console.log('successfully load raw data from gdocs');
   $.jStorage.set('raw', raw);
   on_raw_loaded(raw);
-}).fail(function() {
-  console.log('failed to connect to gdocs');
-  var raw = $.jStorage.get('raw');
-  on_raw_loaded(raw);
-});
-*/
+})
 
-  var raw = $.jStorage.get('raw');
-  on_raw_loaded(raw);
+//  var raw = $.jStorage.get('raw');
+//  on_raw_loaded(raw);
 
 function on_raw_loaded(raw) {
   console.log('on raw loaded .....');

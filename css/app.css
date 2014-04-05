@@ -97,31 +97,20 @@
 
 }
 
-#last_game {
-  width: 490px;
-  height: 350;
-  float: left;
-  padding: 5px;
-  font-family: "Segoe UI Light", "Helvetica Neue Light", "Segoe UI", "Helvetica Neue", "Trebuchet MS", Verdana;
-}
-
-#game #title {
+#game_title {
   font-size: 24px;
   text-align: center;
-  margin-bottom: 10px;
+  margin: 10px;
 }
 
-#game div.team {
-  width: 145px;
-  height: 200px;
-  margin: 5px;
-  float: left;
+.game-board {
   border: solid 1px;
+  padding: 0;
+  min-height: 160px;
 }
 
 #game-stats {
   text-align: center;
-  margin: 10px;
 }
 
 .team-title {
@@ -131,7 +120,7 @@
 }
 
 #score {
-  font-size: 40px;
+  font-size: 3em;
   font-weight: bold;
   margin-top: 40px;
   margin-bottom: 15px;

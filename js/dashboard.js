@@ -32,14 +32,12 @@ var dashboard1 = (function () {
 
     function render() {
 
-        var html =
-            '<div id="chart1" class="chart"></div>' +
-                '<div id="chart2" class="chart"></div>';
+        var html = $('#dashboard_tmpl').html();
 
         $("#content").html(html);
 
-        createLastGameWidget('#chart1');
-        createHeadsCountLineChart('#chart2');
+        createLastGameWidget('#game_boards');
+        createHeadsCountLineChart('#heads_count');
         //createBarChart('#chart2');
 
     }

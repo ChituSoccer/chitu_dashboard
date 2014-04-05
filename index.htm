@@ -18,19 +18,19 @@
     <div class="title">Menu</div>
     <ul class="list">
         <li class="list-item">
-            <a class="item-content" href="#dashboard/1">
+            <a class="item-content" href="#dashboard">
                 <i class="ion-stats-bars"></i>
                 <h3>Dashboard</h3>
             </a>
         </li>
         <li class="list-item">
-            <a class="item-content" href="#dashboard/players">
+            <a class="item-content" href="#players">
                 <i class="ion-pie-graph"></i>
                 <h3>Players</h3>
             </a>
         </li>
         <li class="list-item">
-            <a class="item-content" href="#dashboard/games">
+            <a class="item-content" href="#games">
                 <i class="ion-connection-bars"></i>
                 <h3>Games</h3>
             </a>
@@ -120,6 +120,14 @@
     </div>
   </script>
   
+  <script type="text/template" id="player_tmpl">
+    <div class="row-fluid player-profile">
+      <div class="col-md-12" id="name"><%- name %></div>
+      <div class="col-md-4 chart" id="win-lose-stats-chart"></div>
+      <div class="col-md-4 chart" id="white-color-stats-chart"></div>
+    </div>
+  </script>
+  
   <script src="libs/jquery-2.1.0.min.js"></script>
   <script src="libs/underscore-min.js"></script>
   <script src="libs/fastclick.js"></script>
@@ -129,6 +137,7 @@
   <script src="libs/gdocs.js"></script>
   <script src="libs/jstorage.js"></script>
   <script src="libs/readmore.min.js"></script>
+  <script src="libs/routie.min.js"></script>
   
   <link rel="stylesheet" href="libs/slickgrid/css/smoothness/jquery-ui-1.8.16.custom.css" type="text/css"/>
   <script src="libs/slickgrid/lib/jquery.event.drag-2.2.js"></script>

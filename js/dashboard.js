@@ -5,7 +5,7 @@
 //   4. player stats board
 //   6. 
 
-var dashboard1 = (function () {
+var dashboard_controller = (function () {
 
   "use strict";
 
@@ -74,7 +74,7 @@ var slickgrid_sorter = function(cols) {
   };
 };
         
-var dashboard_players = (function () {
+var players_controller = (function () {
 
     "use strict";
     
@@ -111,21 +111,69 @@ var dashboard_players = (function () {
     }
 
     function render() {
-
       var html = '<div id="players-table"></div>';
-
       $("#content").html(html);
-
       createPlayersTable('#players-table');
+    }
+    
+    function is_number(num){ return !isNaN(num); }
+    function to_number(num) { return +num; }
+    
+    var player_tmpl = _.template($('#player_tmpl').html());
+    // name can be id or name
+    function render_player(name) {
+      if (is_number(name)) create_player_page("#content", dp.players[to_number(name)]);
+    }
+    
+    function show_stats_chart(selector, data, title) {
+      $(selector).dxPieChart({
+        dataSource: data,
+        title: title,
+        tooltip: {
+          enabled: true,
+          percentPrecision: 2,
+          customizeText: function() { 
+            return this.valueText + " - " + this.percentText;
+          }
+        },
+        legend: {
+          horizontalAlignment: "right",
+          verticalAlignment: "top",
+          margin: 0
+        },
+        series: [{
+          type: "doughnut",
+          argumentField: "name",
+          label: {
+            visible: true,
+            connector: {
+              visible: true
+            }
+          }
+        }]
+      });
+    }
+    
+    function create_player_page(selector, player) {
+      $("#content").html(player_tmpl(player));
+      var wl_data = _.map(["win", "lose", "tie", "switch"], function(name) {
+        if (player[name]) return { name: name, val:player[name] };
+      });
+      show_stats_chart("#win-lose-stats-chart", wl_data, "win/lose counts");
+      var side_data = _.map(["W", "C", "WC", "CW"], function(name) {
+        if (player[name]) return { name: name, val:player[name] };
+      });
+      show_stats_chart("#white-color-stats-chart", side_data, "white/color counts");
     }
 
     return {
-        render: render
+        render: render,
+        render_player: render_player
     }
 
 }());
 
-var dashboard_games = (function () {
+var games_controller = (function () {
 
     "use strict";
     
@@ -156,11 +204,8 @@ var dashboard_games = (function () {
     }
 
     function render() {
-
       var html = '<div id="games-table"></div>';
-
       $("#content").html(html);
-
       createGamesTable('#games-table');
     }
 
@@ -170,3 +215,5 @@ var dashboard_games = (function () {
 
 }());
 
+// render player
+//   name, 

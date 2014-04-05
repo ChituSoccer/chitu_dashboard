@@ -25,12 +25,16 @@
   function route() {
     var hash = window.location.hash;
     hide_menu(); 
-    if (hash == "" || hash === "#dashboard/1") {
-        dashboard1.render();
-    } else if (hash === "#dashboard/games") {
-        dashboard_games.render();
-    } else if (hash === "#dashboard/players") {
-        dashboard_players.render();
+    if (hash == "" || hash === "#dashboard") {
+      dashboard_controller.render();
+    } else if (hash === "#games") {
+      games_controller.render();
+    } else if (hash === "#players") {
+      players_controller.render();
+    } else {
+      var names = hash.split('/');
+      if (names.length < 2) return;
+      if (names[0] == "#players") players_controller.render_player(names[1]);
     }
   }
 

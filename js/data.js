@@ -78,6 +78,10 @@ function get_omat(raw) {
 // the first column is the player's id
 function create_data_products(raw) {
   var dp = {};
+  
+  // constants/definitions
+  dp.win_lose_code_table = { 'W': 'win', 'L': 'lose', 'T': 'tie', 'S': 'switch' };
+
   dp.raw = raw;
   dp.rows = get_raw_rows(raw);
   dp.cols = get_raw_cols(raw);
@@ -162,8 +166,6 @@ function get_win_side(str) {
 function get_win_sides(dp) {
   return _.map(dp.omat[1], get_win_side);
 }
-
-var win_lose_code_table = { 'W': 'win', 'L': 'lose', 'T': 'tie', 'S': 'switch' };
 
 function get_win_lose_code(win_side, side) {
   if (side) {

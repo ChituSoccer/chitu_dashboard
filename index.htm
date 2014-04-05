@@ -58,6 +58,15 @@
     </div>
   </script>
 
+  <script type="text/template" id="team_tmpl">
+    <div class="board-title"><%- title %></div>
+    <ul class="players">
+      <% _.each(player_ids, function(id) { %>
+        <li><a href="#players/<%- id %>"><%- dp.players[id].name %></a></li>
+      <% }); %>
+    </ul>
+  </script>
+  
   <script type="text/template" id="game_tmpl">
     <div class="row-fluid">
       <div class = "col-md-12 boards-title">Game(<%= time %>)</div>
@@ -72,22 +81,12 @@
       </div>
       <div class="col-sm-4">
         <div class="board">
-          <div class="board-title">White Team</div>
-          <ul class="players">
-            <% _.each(white_team, function(id) { %>
-              <li><a href="#players/<%- id %>"><%- dp.players[id].name %></a></li>
-            <% }); %>
-          </ul>
+          <% print(_.template($("#team_tmpl").html(), {title: "White Team", player_ids: white_team})); %>
         </div>
       </div>
       <div class="col-sm-4">
         <div class="board">
-          <div class="board-title">Color Team</div>
-          <ul class="players">
-            <% _.each(color_team, function(id) { %>
-              <li><a href="#players/<%- id %>"><%- dp.players[id].name %></a></li>
-            <% }); %>
-          </ul>
+          <% print(_.template($("#team_tmpl").html(), {title: "Color Team", player_ids: color_team})); %>
         </div>
       </div>
     </div>

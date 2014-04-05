@@ -20,7 +20,7 @@
 
   function route() {
     var hash = window.location.hash;
-    if (hash === "#dashboard/1") {
+    if (hash == "" || hash === "#dashboard/1") {
         dashboard1.render();
     } else if (hash === "#dashboard/games") {
         dashboard_games.render();

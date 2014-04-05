@@ -74,8 +74,8 @@
         <div class="board">
           <div class="board-title">White Team</div>
           <ul class="players">
-            <% _.each(white_team, function(name) { %>
-              <li><a href="#players/<%- name %>"><%- name %></a></li>
+            <% _.each(white_team, function(id) { %>
+              <li><a href="#players/<%- id %>"><%- dp.players[id].name %></a></li>
             <% }); %>
           </ul>
         </div>
@@ -84,8 +84,8 @@
         <div class="board">
           <div class="board-title">Color Team</div>
           <ul class="players">
-            <% _.each(color_team, function(name) { %>
-              <li><a href="#players/<%- name %>"><%- name %></a></li>
+            <% _.each(color_team, function(id) { %>
+              <li><a href="#players/<%- id %>"><%- dp.players[id].name %></a></li>
             <% }); %>
           </ul>
         </div>

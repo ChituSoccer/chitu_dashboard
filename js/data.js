@@ -132,11 +132,11 @@ function get_game_info(dp, ind) {
   var white_team = []; var color_team = []; var nplayers = 0;
   for (i = 2; i < dp.rows; i++) {
     var side = omat[i][ind].trim();
-    var name = dp.player_names[i];
+    //var name = dp.player_names[i];
     if (side && side != "0") nplayers++;
-    if (side == 'W') white_team.push(name);
-    else if (side == 'C') color_team.push(name);
-    else if (side == 'WC' || side == 'CW') { white_team.push(name); color_team.push(name); }
+    if (side == 'W') white_team.push(i);
+    else if (side == 'C') color_team.push(i);
+    else if (side == 'WC' || side == 'CW') { white_team.push(i); color_team.push(i); }
   }
   game.white_team = white_team; 
   game.color_team = color_team;

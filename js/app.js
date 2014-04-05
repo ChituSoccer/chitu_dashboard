@@ -14,12 +14,17 @@
     else { $('#container').addClass('offset'); }
     return false;
   });
+  
+  function hide_menu() {
+    if ($('#container').hasClass('offset')) { $('#container').removeClass('offset'); } 
+  }
 
   // Basic view routing
   $(window).on('hashchange', route);
 
   function route() {
     var hash = window.location.hash;
+    hide_menu(); 
     if (hash == "" || hash === "#dashboard/1") {
         dashboard1.render();
     } else if (hash === "#dashboard/games") {

@@ -215,5 +215,14 @@ var games_controller = (function () {
 
 }());
 
+var pages_controller = (function () {
+  "use strict";
+  function render_about() {
+    $("#content").html('<div style="margin:50px;text-align:center">brought to you by ferryzhou</div>');
+  }
+  return {
+    render_about: render_about
+  }
+}());
 // render player
 //   name, 

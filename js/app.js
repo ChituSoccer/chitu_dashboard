@@ -31,6 +31,8 @@
       games_controller.render();
     } else if (hash === "#players") {
       players_controller.render();
+    } else if (hash === "#about") {
+      pages_controller.render_about();
     } else {
       var names = hash.split('/');
       if (names.length < 2) return;

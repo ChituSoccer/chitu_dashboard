@@ -176,8 +176,6 @@
 }
 
 .player-chart {
-  min-height: 300px;
-  float: left;
-  padding: 10px;
+  min-height: 250px;
 }
 

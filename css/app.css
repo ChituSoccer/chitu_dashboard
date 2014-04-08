@@ -175,3 +175,9 @@
   text-align: center;
 }
 
+.player-chart {
+  min-height: 300px;
+  float: left;
+  padding: 10px;
+}
+

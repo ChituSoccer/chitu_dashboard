@@ -122,10 +122,10 @@ var players_controller = (function () {
     var player_tmpl = _.template($('#player_tmpl').html());
     // name can be id or name
     function render_player(name) {
-      if (is_number(name)) create_player_page_canvasjs("#content", dp.players[to_number(name)]);
+      if (is_number(name)) create_player_page_chartjs("#content", dp.players[to_number(name)]);
     }
     
-    function create_player_page_chart_chartjs(selector, player) {
+    function create_player_page_chartjs(selector, player) {
       $("#content").html(player_tmpl(player));
       var wl_data = _.map(["win", "lose", "tie", "switch"], function(name) {
         if (player[name]) return { name: name, val:player[name] };

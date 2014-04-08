@@ -166,45 +166,6 @@ var players_controller = (function () {
       });
     }
     
-    function create_player_page_canvasjs(selector, player) {
-      $("#content").html(player_tmpl(player));
-      var wl_data = _.map(["win", "lose", "tie", "switch"], function(name) {
-        if (player[name]) return { label: name, y:player[name] } 
-        else return { label: name, y:0 };
-      });
-      show_stats_chart_canvasjs("win-lose-stats-chart", wl_data, "win/lose counts");
-      var side_data = _.map(["W", "C", "WC", "CW"], function(name) {
-        if (player[name]) return { label: name, y:player[name] } 
-        else return { label: name, y:0 };
-      });
-      show_stats_chart_canvasjs("white-color-stats-chart", side_data, "white/color counts");
-    }
-
-    function show_stats_chart_canvasjs(div_id, data, title) {
-      var chart = new CanvasJS.Chart(div_id,
-      {
-        title:{
-          text: title
-        },
-        theme: "theme2",
-        data: [
-        {        
-          type: "doughnut",
-          indexLabelFontFamily: "Garamond",       
-          indexLabelFontSize: 20,
-          startAngle:0,
-          indexLabelFontColor: "dimgrey",       
-          indexLabelLineColor: "darkgrey", 
-          toolTipContent: "{y} %", 					
-
-          dataPoints: data
-        }
-        ]
-      });
-
-      chart.render();
-    }
-    
     return {
         render: render,
         render_player: render_player

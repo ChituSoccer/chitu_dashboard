@@ -122,10 +122,22 @@ var players_controller = (function () {
     var player_tmpl = _.template($('#player_tmpl').html());
     // name can be id or name
     function render_player(name) {
-      if (is_number(name)) create_player_page("#content", dp.players[to_number(name)]);
+      if (is_number(name)) create_player_page_canvasjs("#content", dp.players[to_number(name)]);
     }
     
-    function show_stats_chart(selector, data, title) {
+    function create_player_page_chart_chartjs(selector, player) {
+      $("#content").html(player_tmpl(player));
+      var wl_data = _.map(["win", "lose", "tie", "switch"], function(name) {
+        if (player[name]) return { name: name, val:player[name] };
+      });
+      show_stats_chart_chartjs("#win-lose-stats-chart", wl_data, "win/lose counts");
+      var side_data = _.map(["W", "C", "WC", "CW"], function(name) {
+        if (player[name]) return { name: name, val:player[name] };
+      });
+      show_stats_chart_chartjs("#white-color-stats-chart", side_data, "white/color counts");
+    }
+
+    function show_stats_chart_chartjs(selector, data, title) {
       $(selector).dxPieChart({
         dataSource: data,
         title: title,
@@ -154,18 +166,45 @@ var players_controller = (function () {
       });
     }
     
-    function create_player_page(selector, player) {
+    function create_player_page_canvasjs(selector, player) {
       $("#content").html(player_tmpl(player));
       var wl_data = _.map(["win", "lose", "tie", "switch"], function(name) {
-        if (player[name]) return { name: name, val:player[name] };
+        if (player[name]) return { label: name, y:player[name] } 
+        else return { label: name, y:0 };
       });
-      show_stats_chart("#win-lose-stats-chart", wl_data, "win/lose counts");
+      show_stats_chart_canvasjs("win-lose-stats-chart", wl_data, "win/lose counts");
       var side_data = _.map(["W", "C", "WC", "CW"], function(name) {
-        if (player[name]) return { name: name, val:player[name] };
+        if (player[name]) return { label: name, y:player[name] } 
+        else return { label: name, y:0 };
       });
-      show_stats_chart("#white-color-stats-chart", side_data, "white/color counts");
+      show_stats_chart_canvasjs("white-color-stats-chart", side_data, "white/color counts");
     }
 
+    function show_stats_chart_canvasjs(div_id, data, title) {
+      var chart = new CanvasJS.Chart(div_id,
+      {
+        title:{
+          text: title
+        },
+        theme: "theme2",
+        data: [
+        {        
+          type: "doughnut",
+          indexLabelFontFamily: "Garamond",       
+          indexLabelFontSize: 20,
+          startAngle:0,
+          indexLabelFontColor: "dimgrey",       
+          indexLabelLineColor: "darkgrey", 
+          toolTipContent: "{y} %", 					
+
+          dataPoints: data
+        }
+        ]
+      });
+
+      chart.render();
+    }
+    
     return {
         render: render,
         render_player: render_player

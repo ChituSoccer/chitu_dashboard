@@ -14,16 +14,16 @@ function load_data(on_ready) {
 
 var chitu_pubdata_key = '0ApIcf6jg2PQ4dEFNTFo2NTl2NzcwQUVaQmJwbklBN1E';
 
-
+/*
 gdocs.fetch({ url: chitu_pubdata_key }).done(function(raw) {
   // structure of result is below
   console.log('successfully load raw data from gdocs');
   $.jStorage.set('raw', raw);
   on_raw_loaded(raw);
-})
+})*/
 
-//var raw = $.jStorage.get('raw');
-//on_raw_loaded(raw);
+var raw = $.jStorage.get('raw');
+on_raw_loaded(raw);
 
 function on_raw_loaded(raw) {
   console.log('on raw loaded .....');
@@ -95,7 +95,7 @@ function create_data_products(raw) {
   dp.players = get_players(dp);
   dp.ngames = dp.games.slice(1, dp.games.length);
   dp.nplayers = dp.players.slice(2, dp.players.length);
-  dp.nplayers_by_score = get_players_by_score(dp.nplayers);
+  dp.nplayers_by_score = sort_players_by_score(dp.nplayers);
   return dp;
 }
 
@@ -194,6 +194,10 @@ function arr_slice(arr, indices) {
   return _.map(indices, function(i) { return arr[i]; });
 }
 
+function is_attend(side_str) {
+  return (side_str && side_str != '0');
+}
+
 // from the spreadsheet input
 // compute statistics for each player
 // players[i] is a structure with 
@@ -215,9 +219,11 @@ function get_player_info(dp, i) {
   var player = {};
   player.id = i;
   player.name = dp.player_names[i];
-  var game_indices = [];
   var all_sides = dp.omat[i];
-  for (var j = 1; j < dp.cols; j++) { if (all_sides[j] && all_sides[j] != '0') { game_indices.push(j); } }
+  player.attend_mask = _.map(all_sides, is_attend);
+  
+  var game_indices = [];
+  for (var j = 1; j < dp.cols; j++) { if (is_attend(all_sides[j])) { game_indices.push(j); } }
   player.game_indices = game_indices;
   player.attend_days = arr_slice(dp.omat[0], game_indices);
   player.sides = arr_slice(dp.omat[i], game_indices);
@@ -226,6 +232,8 @@ function get_player_info(dp, i) {
   var scores = get_scores(wl_counts);
   var side_counts = _.countBy(player.sides, function(c) {return c;});
   player.attend = game_indices.length;
+  player.attend_rate = player.attend / (dp.cols - 1);
+  
   player = $.extend({}, player, wl_counts, scores, side_counts);
   
   return player;
@@ -251,7 +259,7 @@ function get_players(dp) {
   return players;
 }
 
-function get_players_by_score(players) {
+function sort_players_by_score(players) {
   var players_by_score = {};
   _.each(["acc", "impact", "attend"], function(score_type) {
     players_by_score[score_type] = _.sortBy(players, score_type).reverse();

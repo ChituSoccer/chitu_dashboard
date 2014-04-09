@@ -86,6 +86,7 @@ var players_controller = (function () {
         {id: "acc", name: "Acc. Score", field: "acc", sortable: true },
         {id: "impact", name: "Effectiveness", field: "impact", sortable: true},
         {id: "attend", name: "Attend", field: "attend", sortable: true},
+        {id: "attend_rate", name: "Attend Rate", field: "attend_rate", sortable: true},
         {id: "white", name: "White", field: "W", sortable: true},
         {id: "color", name: "Color", field: "C", sortable: true},
         {id: "win", name: "Win", field: "win", sortable: true},

@@ -219,24 +219,34 @@ function get_player_info(dp, i) {
   var player = {};
   player.id = i;
   player.name = dp.player_names[i];
-  var all_sides = dp.omat[i];
-  player.attend_mask = _.map(all_sides, is_attend);
+  //player.attend_mask = _.map(all_sides, is_attend);
   
-  var game_indices = [];
-  for (var j = 1; j < dp.cols; j++) { if (is_attend(all_sides[j])) { game_indices.push(j); } }
-  player.game_indices = game_indices;
-  player.attend_days = arr_slice(dp.omat[0], game_indices);
-  player.sides = arr_slice(dp.omat[i], game_indices);
-  player.win_lose_codes = arr_slice(dp.win_lose_matrix[i], game_indices);
-  var wl_counts = get_win_lose_counts(player.win_lose_codes);
-  var scores = get_scores(wl_counts);
-  var side_counts = _.countBy(player.sides, function(c) {return c;});
-  player.attend = game_indices.length;
-  player.attend_rate = player.attend / (dp.cols - 1);
+  var stats_all = get_player_stats_from_last_n_days(dp, dp.cols - 1, i);
   
-  player = $.extend({}, player, wl_counts, scores, side_counts);
+  player = $.extend({}, player, stats_all);
+  
+  var N = 10;
+  player.stats_N = get_player_stats_from_last_n_days(dp, N, i);
   
   return player;
+}
+
+function get_player_stats_from_last_n_days(dp, N, i) {
+  var stats = {};
+  var game_indices = [];
+  var all_sides = dp.omat[i];
+  for (var j = dp.cols - N; j < dp.cols; j++) { if (is_attend(all_sides[j])) { game_indices.push(j); } }
+  stats.game_indices = game_indices;
+  stats.attend_days = arr_slice(dp.omat[0], game_indices);
+  stats.sides = arr_slice(dp.omat[i], game_indices);
+  stats.win_lose_codes = arr_slice(dp.win_lose_matrix[i], game_indices);
+  var wl_counts = get_win_lose_counts(stats.win_lose_codes);
+  var scores = get_scores(wl_counts);
+  var side_counts = _.countBy(stats.sides, function(c) {return c;});
+  stats.attend = game_indices.length;
+  stats.attend_rate = stats.attend / N;
+  stats = $.extend({}, stats, wl_counts, scores, side_counts);
+  return stats;
 }
 
 function get_win_lose_counts(win_lose_codes) {

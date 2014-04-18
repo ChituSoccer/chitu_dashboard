@@ -267,8 +267,10 @@ function create_data_products(raw) {
   dp.ndata = get_ndata(dp);
   dp.games = get_games(dp.ndata);
   dp.last_game = _.last(dp.games);
-  dp.players = get_players_by_range(dp.ndata, 0, dp.ndata.M);
-  dp.players_by_score = sort_players_by_score(dp.players);
+  
+  dp.day_range = 12;
+  dp.players = function() { return get_players_by_range(dp.ndata, dp.ndata.M - dp.day_range, dp.ndata.M); }
+  dp.players_by_score = function() { return sort_players_by_score(dp.players()); }
   return dp;
 }
 

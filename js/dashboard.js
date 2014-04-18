@@ -100,7 +100,7 @@ var players_controller = (function () {
         multiColumnSort: true
       };
 
-      grid = new Slick.Grid(selector, dp.players, columns, options);
+      grid = new Slick.Grid(selector, dp.players(), columns, options);
       
       grid.onSort.subscribe(function (e, args) {
         var cols = args.sortCols;
@@ -123,7 +123,8 @@ var players_controller = (function () {
     var player_tmpl = _.template($('#player_tmpl').html());
     // name can be id or name
     function render_player(name) {
-      if (is_number(name)) create_player_page_chartjs("#content", dp.players[to_number(name)]);
+      var players = dp.players();
+      if (is_number(name)) create_player_page_chartjs("#content", players[to_number(name)]);
     }
     
     function create_player_page_chartjs(selector, player) {

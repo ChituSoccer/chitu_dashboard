@@ -68,7 +68,7 @@
     <div class="board-title"><%- title %></div>
     <ul class="players">
       <% _.each(player_ids, function(id) { %>
-        <li><a href="#players/<%- id %>"><%- dp.players[id].name %></a></li>
+        <li><a href="#players/<%- id %>"><%- dp.players()[id].name %></a></li>
       <% }); %>
     </ul>
   </script>
@@ -119,7 +119,7 @@
     <div class="row-fluid">
       <% _.each(["acc", "impact", "attend"], function(score_type) { %>
         <div class="col-sm-4">
-          <% print(leaderboard_tmpl({"score_type": score_type, "players": dp.players_by_score[score_type]})); %>
+          <% print(leaderboard_tmpl({"score_type": score_type, "players": dp.players_by_score()[score_type]})); %>
         </div>
       <% }); %>
     </div>

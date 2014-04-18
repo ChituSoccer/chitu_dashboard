@@ -34,6 +34,7 @@ function on_raw_loaded(raw) {
   on_ready();
   //window.update_on_hash();
 }
+}
 
 // i-th row, j-th col, start from 0
 function get_raw_value(raw, i, j) {
@@ -84,6 +85,9 @@ function get_omat(raw) {
 //   player_names: player name array, N x 1, players[i] is ith player name, start from 0
 //   days: array of game day, M x 1, days[j] is jth game's day
 //   game_scores: array of scores, M x 1, scores[j] is jth game's score
+//
+//   win_sides: M x 1, 'W' if white wins, 'C' if color wins, 'T' if tie
+//   wlmat: N x M, win/lose matrix, wlmat[i][j] is win/lose code for ith player in jth game
 // }
 // 
 function get_ndata(dp) {
@@ -97,24 +101,13 @@ function get_ndata(dp) {
   }
   var days = dp.omat[0].slice(1, 1 + M);
   var scores = dp.omat[1].slice(1, 1 + M);
-  return { player_count: N, game_count: M, smat: smat, player_names: players, 
-           days: days, game_scores: scores };
-}
-
-// input ndata
-// return a data structure contains high level data products
-// {
-//   win_sides: M x 1, 'W' if white wins, 'C' if color wins, 'T' if tie
-//   wlmat: N x M, win/lose matrix, wlmat[i][j] is win/lose code for ith player in jth game
-//   games: M x 1 array of game statistics structure
-//   players: N x 1 array of player statistics structure
-//   splayers: hash of sorted players, based on different score metrics
-// }
-function get_pndata(ndata) {
-  var win_sides = _.map(ndata.scores, get_win_side);
-  var wlmat = get_wlmat(ndata, win_sides);
-  var games = get_games(ndata, win_sides);
-  var players = get_players(ndata, win_sides, wlmat);
+  
+  // derived info
+  var win_sides = _.map(scores, get_win_side);
+  var wlmat = get_wlmat(smat, N, M, win_sides);
+  
+  return { N: N, M: M, player_count: N, game_count: M, smat: smat, player_names: players, 
+           days: days, game_scores: scores, win_sides: win_sides, wlmat: wlmat };
 }
 
 // return 'W', 'C' or 'T' (for tie)
@@ -145,39 +138,138 @@ function get_win_lose_code(win_side, side) {
 }
 
 // wlm[i][j] = W|L|T|"" for ith player and jth game
-function get_wlmat(ndata, win_sides) {
+function get_wlmat(smat, N, M, win_sides) {
   var wlm = [];
-  for (var i = 0; i < ndata.N; i++) {
+  for (var i = 0; i < N; i++) {
     var r = [];
-    for (var j = 0; j < ndata.M; j++) {
-      r[j] = get_win_lose_code(win_sides[j], ndata.smat[i][j]);
+    for (var j = 0; j < M; j++) {
+      r[j] = get_win_lose_code(win_sides[j], smat[i][j]);
     }
     wlm[i] = r;
   }
   return wlm;
 }
 
-function get_games(ndata, win_sides) {
-  var games = [];
-  for (var i = 0; i < ndata.M; i++) {
-    var game = {};
-    game.id = i;
-    game.day = ndata.days[i];
-    game.score = ndata.scores[i];
-    var white_team = []; var color_team = []; var nplayers = 0;
-    for (j = 0; j < ndata.N; j++) {
-      var side = ndata.smat[j][i];
-      if (side && side != "0") nplayers++;
-      if (side == 'W') white_team.push(i);
-      else if (side == 'C') color_team.push(i);
-      else if (side == 'WC' || side == 'CW') { white_team.push(i); color_team.push(i); }
-    }
-    game.white_team = white_team; 
-    game.color_team = color_team;
-    game.nplayers = nplayers;
-    games[i] = game;
+// input ndata
+// return a data structure contains high level data products
+// {
+//   games: M x 1 array of game statistics structure
+//   players: N x 1 array of player statistics structure
+//   splayers: hash of sorted players, based on different score metrics
+// }
+function get_pndata(ndata) {
+  var games = get_games(ndata, win_sides);
+  var players = get_players(ndata, win_sides, wlmat);
+}
+
+// answer the question /games/:index
+function get_game(ndata, game_index) {
+  var game = {};
+  game.id = game_index;
+  game.time = ndata.days[game_index];
+  game.score = ndata.game_scores[game_index];
+  var white_team = []; var color_team = []; var nplayers = 0;
+  for (var i = 0; i < ndata.N; i++) {
+    var side = ndata.smat[i][game_index];
+    if (side && side != "0") nplayers++;
+    if (side == 'W') white_team.push(i);
+    else if (side == 'C') color_team.push(i);
+    else if (side == 'WC' || side == 'CW') { white_team.push(i); color_team.push(i); }
   }
-  return games;
+  game.white_team = white_team; 
+  game.color_team = color_team;
+  game.nplayers = nplayers;
+  return game;
+}
+
+function get_games(ndata) {
+  return _.map(_.range(ndata.M), function(i) { return get_game(ndata, i); });
+}
+
+function get_players_by_range(ndata, from_day_id, to_day_id) {
+  console.log(from_day_id + ' -> ' + to_day_id);
+  var players = [];
+  for (var i = 0; i < ndata.player_count; i++) {
+    var player = {id: i, name: ndata.player_names[i]};
+    var stats = get_player_stats(ndata, i, from_day_id, to_day_id);
+    player = $.extend({}, player, stats);
+    players.push(player);
+  }
+  return players;
+}
+
+// get a player's performance score in specific time range [from_day_id, to_day_id)
+function get_player_stats(ndata, player_id, from_day_id, to_day_id) {
+  var game_indices = get_game_indices(ndata, player_id, from_day_id, to_day_id);
+  var wl_codes = arr_slice(ndata.wlmat[player_id], game_indices);
+  var sides = arr_slice(ndata.smat[player_id], game_indices);
+  var wl_counts = get_win_lose_counts(wl_codes);
+  var scores = get_scores(wl_counts);
+  var side_counts = _.countBy(sides, function(c) {return c;});
+  stats = {game_indices: game_indices, wl_codes: wl_codes, sides: sides}
+  stats.attend = game_indices.length;
+  stats.attend_rate = stats.attend / (to_day_id - from_day_id);
+  stats = $.extend({}, stats, wl_counts, scores, side_counts);
+  return stats;
+}
+
+function get_game_indices(ndata, player_id, from_day_id, to_day_id) {
+  var game_indices = [];
+  for (var i = from_day_id; i < to_day_id; i++) {
+    if (is_attend(ndata.smat[player_id][i])) game_indices.push(i);
+  }
+  return game_indices;
+}
+
+function get_win_lose_counts(win_lose_codes) {
+  var win_lose_code_table = { 'W': 'win', 'L': 'lose', 'T': 'tie', 'S': 'switch' };
+  return _.countBy(win_lose_codes, function(c) { return win_lose_code_table[c]; });
+}
+
+function get_scores(wl_counts) {
+  var total = 0; var avg = 0; var acc = 0;
+  if (wl_counts.win) { total += wl_counts.win; acc += 3 * wl_counts.win; }
+  if (wl_counts.tie) { total += wl_counts.tie; acc += 1.5 * wl_counts.tie; }
+  if (wl_counts['switch']) { var n = wl_counts['switch']; total += n; acc += 1.5 * n; }
+  if (wl_counts.lose) { var n = wl_counts.lose; total += n; acc += 0; }
+  return { 'acc': acc, 'impact': (acc + 3) / (total + 3) };  
+}
+
+// utils
+
+// arr[indices]
+function arr_slice(arr, indices) {
+  return _.map(indices, function(i) { return arr[i]; });
+}
+
+function is_attend(side_str) {
+  return (side_str && side_str != '0');
+}
+
+function sort_players_by_score(players) {
+  var players_by_score = {};
+  _.each(["acc", "impact", "attend"], function(score_type) {
+    players_by_score[score_type] = _.sortBy(players, score_type).reverse();
+  });
+  return players_by_score;
+}
+
+function create_data_products(raw) {
+  var dp = {};
+  
+  // constants/definitions
+  dp.win_lose_code_table = { 'W': 'win', 'L': 'lose', 'T': 'tie', 'S': 'switch' };
+
+  dp.raw = raw;
+  dp.rows = get_raw_rows(raw);
+  dp.cols = get_raw_cols(raw);
+  dp.omat = get_omat(raw);
+  dp.ndata = get_ndata(dp);
+  dp.games = get_games(dp.ndata);
+  dp.last_game = _.last(dp.games);
+  dp.players = get_players_by_range(dp.ndata, 0, dp.ndata.M);
+  dp.players_by_score = sort_players_by_score(dp.players);
+  return dp;
 }
 
 // =========================>
@@ -187,7 +279,7 @@ function get_games(ndata, win_sides) {
 // records: field_id: value
 // records[i][fields[j].id] is the value in i-th row and j-th column
 // the first column is the player's id
-function create_data_products(raw) {
+function create_data_products_old(raw) {
   var dp = {};
   
   // constants/definitions
@@ -274,14 +366,6 @@ function get_win_lose_matrix(dp) {
   return wlm;
 }
 
-function arr_slice(arr, indices) {
-  return _.map(indices, function(i) { return arr[i]; });
-}
-
-function is_attend(side_str) {
-  return (side_str && side_str != '0');
-}
-
 // from the spreadsheet input
 // compute statistics for each player
 // players[i] is a structure with 
@@ -353,15 +437,6 @@ function get_players(dp) {
   return players;
 }
 
-function sort_players_by_score(players) {
-  var players_by_score = {};
-  _.each(["acc", "impact", "attend"], function(score_type) {
-    players_by_score[score_type] = _.sortBy(players, score_type).reverse();
-  });
-  return players_by_score;
-}
-
 //var comments = {};
 //comments['3/29/2014']['CL'] = '少父聊发中年狂，左牵黄，右擎苍。弃帽脱裘，健骑卷平冈。欲沐春露驭赤兔，亲射虎，看李郎。'
 //　　 + '雨酣胸胆尚开张，鬓微霜，又何妨！持球泥中，今日过冯唐！会挽雕弓如满月，西北望，射天狼。';
-}

@@ -100,12 +100,12 @@ var players_controller = (function () {
         multiColumnSort: true
       };
 
-      grid = new Slick.Grid(selector, dp.nplayers, columns, options);
+      grid = new Slick.Grid(selector, dp.players, columns, options);
       
       grid.onSort.subscribe(function (e, args) {
         var cols = args.sortCols;
 
-        dp.nplayers.sort(slickgrid_sorter(cols));        
+        dp.players.sort(slickgrid_sorter(cols));        
         grid.invalidateAllRows();
         grid.render();
       });
@@ -193,12 +193,12 @@ var games_controller = (function () {
         multiColumnSort: true
       };
 
-      grid = new Slick.Grid(selector, dp.ngames, columns, options);
+      grid = new Slick.Grid(selector, dp.games, columns, options);
       
       grid.onSort.subscribe(function (e, args) {
         var cols = args.sortCols;
 
-        dp.ngames.sort(slickgrid_sorter(cols));        
+        dp.games.sort(slickgrid_sorter(cols));        
         grid.invalidateAllRows();
         grid.render();
       });
